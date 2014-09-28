@@ -1,0 +1,12 @@
+Simple cairo-based battery widget for Awesome 3.5
+
+INSTALLATION:
+1)
+   cd ~/.config/awesome
+   git clone https://github.com/jorenheit/awesome_batterywidget2.git batterywidget
+
+2) Add to rc.lua:
+   local batterywidget = require("batterywidget")
+
+3) Add to panel:
+   right_layout:add(batterywidge
