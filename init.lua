@@ -14,6 +14,8 @@ local batterywarning = {false, false}
 
 local warnlimit = 30
 local critlimit = 15
+local info
+local warning
 
 local function getBatteryInfo()
    p1 = io.popen("acpi | cut -d: -f 2 | cut -d, -f 1 | sed 's|\ ||'")
@@ -47,14 +49,18 @@ batterywidget.draw = function(widget, wbox, cr, width, height)
 
    local c1 = {red = 1, green = 1, blue = 1}
    local c2 = {red = 1, green = 0.49, blue = 0.16}
+   local c3 = {red = 1, green = 0, blue = 0}
 
    cr.line_width = lw
 
    if stateStr == "Charging" then
       cr:set_source_rgba(c2.red, c2.green, c2.blue, 1)
-   else
+   elseif level > critlimit then
       cr:set_source_rgba(c1.red, c1.green, c1.blue, 1)
+   else
+      cr:set_source_rgba(c3.red, c3.green, c3.blue, 1)
    end
+
    cr:move_to(x, y); 
    cr:line_to(x, y + h)
 
@@ -81,23 +87,23 @@ batterywidget.draw = function(widget, wbox, cr, width, height)
    -- warnings at low levels
    if stateStr == "Charging" then
       batterywarning = {false, false}
+      naughty.destroy(warning)
    else
       if level < critlimit and not batterywarning[2] then
-	 naughty.notify({text = "Warning: Battery Critical", timeout = 0, 
-			 bg = "#FF0000", fg = "#FFFFFF"})
+	 warning = naughty.notify({text = "Warning: Battery Critical", timeout = 0, 
+				   bg = "#FF0000", fg = "#FFFFFF"})
 	 batterywarning[1] = true
 	 batterywarning[2] = true
 
       elseif level < warnlimit and not batterywarning[1] then 
-	 naughty.notify({text = "Warning: Battery Low", timeout = 0, 
-			 bg = "#FF6600", fg = "#FFFFFF" })
+	 warning = naughty.notify({text = "Warning: Battery Low", timeout = 0, 
+				   bg = "#FF6600", fg = "#FFFFFF" })
 	 batterywarning[1] = true
       end
    end
    
 end
 
-local info
 
 batterywidget:connect_signal("mouse::enter", function() 
 			    local level, state
